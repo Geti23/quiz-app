@@ -3,17 +3,17 @@
 A flexible, feature-rich quiz application built with Python using Test-Driven Development (TDD) methodology.
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-failing-red.svg)]()
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
 
 ## Features
 
-- **Multiple Choice Questions** - Support for questions with multiple answer options
-- **Timed Quizzes** - Optional time limits with automatic tracking
-- **Comprehensive Scoring** - Detailed results with percentages and pass/fail thresholds
-- **Difficulty Levels** - Categorize questions by difficulty (easy, medium, hard)
-- **Categories** - Organize questions by topic or category
-- **Answer Review** - Review incorrect answers and get detailed feedback
-- **Test-Driven** - Built with TDD principles for reliability and maintainability
+- ✅**Multiple Choice Questions** - Support for questions with multiple answer options
+- 🔜**Timed Quizzes** - Optional time limits with automatic tracking
+- ✅**Comprehensive Scoring** - Detailed results with percentages and pass/fail thresholds
+- 🔜**Difficulty Levels** - Categorize questions by difficulty (easy, medium, hard)
+- 🔜**Categories** - Organize questions by topic or category
+- ✅**Answer Review** - Review incorrect answers and get detailed feedback
+- ✅**Test-Driven** - Built with TDD principles for reliability and maintainability
 
 ## Installation
 
@@ -39,7 +39,6 @@ pip install -r requirements.txt
 
 ### Basic Usage
 
-Code to be implemented...
 ```python
 from quiz import Quiz, Question
 

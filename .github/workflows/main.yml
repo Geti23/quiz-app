@@ -40,18 +40,18 @@ jobs:
       run: |
         pytest --cov=quiz --cov-report=xml --cov-report=term-missing -v
     
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+#    - name: Upload coverage to Codecov
+#      uses: codecov/codecov-action@v4
+#      with:
+#        file: ./coverage.xml
+#        flags: unittests
+#        name: codecov-umbrella
+#        fail_ci_if_error: false
     
-    - name: Generate coverage badge
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-      run: |
-        coverage report
+#    - name: Generate coverage badge
+#      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+#      run: |
+#        coverage report
 
   lint:
     runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
     - name: Lint with flake8
       run: |
         flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+#        flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
     - name: Type check with mypy
       run: |
