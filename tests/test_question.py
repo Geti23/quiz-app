@@ -19,8 +19,8 @@ class TestQuestion:
             correct_answer="Paris",
         )
         assert question is not None
-        assert question.check_answer("Paris") == True
-        assert question.check_answer("London") == False
+        assert question.check_answer("Paris") is True
+        assert question.check_answer("London") is False
 
     def test_question_requires_text(self):
         with pytest.raises(ValueError):

@@ -26,5 +26,5 @@ class TestQuizIntegration:
         # Check results
         result = quiz.get_result()
         assert result is not None
-        assert result.is_perfect() == True
+        assert result.is_perfect() is True
         assert result.score == 2

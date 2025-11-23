@@ -7,13 +7,13 @@ class TestQuizResult:
     def test_perfect_score(self):
         result = QuizResult(score=5, total=5)
         assert result is not None
-        assert result.is_perfect() == True
+        assert result.is_perfect() is True
 
     def test_passing_grade(self):
         result = QuizResult(score=6, total=10)
         assert result is not None
-        assert result.is_passing(threshold=60) == True
-        assert result.is_passing(threshold=70) == False
+        assert result.is_passing(threshold=60) is True
+        assert result.is_passing(threshold=70) is False
 
     def test_result_summary(self):
         result = QuizResult(score=8, total=10)

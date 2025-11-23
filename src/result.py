@@ -4,7 +4,12 @@ class QuizResult:
     def __init__(self, score: int, total: int) -> None:
         self.score = score
         self.total = total
-        self.percentage = (score / total * 100) if total > 0 else 0.0
+        self.percentage = self._calculate_percentage(score, total)
+
+    @staticmethod
+    def _calculate_percentage(score: int, total: int) -> float:
+        """Calculate percentage score"""
+        return (score / total * 100) if total > 0 else 0.0
 
     def is_perfect(self) -> bool:
         """Check if the score is perfect (100%)"""
@@ -17,3 +22,9 @@ class QuizResult:
     def get_summary(self) -> str:
         """Get a formatted summary of the results"""
         return f"Score: {self.score}/{self.total} ({self.percentage:.1f}%)"
+
+    def __repr__(self) -> str:
+        """String representation for debugging"""
+        return (
+            f"QuizResult(score={self.score}, total={self.total}, percentage={self.percentage:.1f}%)"
+        )

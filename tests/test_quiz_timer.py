@@ -35,4 +35,4 @@ class TestQuizTimer:
 
         quiz.submit_answer(0, "A")
         time.sleep(0.2)
-        assert quiz.is_time_expired() == True
+        assert quiz.is_time_expired() is True

@@ -34,4 +34,4 @@ class TestQuizReview:
         assert details["question"] == question
         assert details["submitted_answer"] == "8"
         assert details["correct_answer"] == "10"
-        assert details["is_correct"] == False
+        assert details["is_correct"] is False
