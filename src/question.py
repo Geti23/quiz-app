@@ -1,16 +1,25 @@
-from typing import List
+from typing import List, Optional
 
 
 class Question:
     """Represents a single quiz question with multiple choice options"""
 
-    def __init__(self, text: str, options: List[str], correct_answer: str) -> None:
+    def __init__(
+        self,
+        text: str,
+        options: List[str],
+        correct_answer: str,
+        difficulty: str = "medium",
+        category: Optional[str] = None,
+    ) -> None:
         if not text or text.strip() == "":
             raise ValueError("Question text cannot be empty")
 
         self.text = text
         self.options = options
         self.correct_answer = correct_answer
+        self.difficulty = difficulty
+        self.category = category
 
     def check_answer(self, answer: str) -> bool:
         """Check if the provided answer is correct"""
