@@ -10,3 +10,11 @@ mypy>=1.0.0
 # Documentation dependencies (optional)
 # sphinx>=5.0.0
 # sphinx-rtd-theme>=1.0.0
+
+# API dependencies
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+
+# API testing dependencies (optional)
+httpx>=0.25.0  # For testing FastAPI endpoints
