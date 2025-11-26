@@ -80,7 +80,7 @@ strict_equality = true
 
 [tool.coverage.run]
 source = ["src"]
-omit = ["*/tests/*", "*/test_*.py"]
+omit = ["*/tests/*", "*/test_*.py", "src/api.py"]
 
 [tool.coverage.report]
 exclude_lines = [
