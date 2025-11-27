@@ -27,8 +27,10 @@ class QuizDatabase:
             str: Unique ID assigned to the quiz
         """
         quiz_id = str(uuid.uuid4())
-        # Store a deep copy to prevent external modifications
-        self._storage[quiz_id] = deepcopy(quiz)
+        # Store a deep copy and set the ID
+        quiz_copy = deepcopy(quiz)
+        quiz_copy.id = quiz_id
+        self._storage[quiz_id] = quiz_copy
         return quiz_id
 
     def get_quiz(self, quiz_id: str) -> Optional[Quiz]:
@@ -59,8 +61,10 @@ class QuizDatabase:
         """
         if quiz_id not in self._storage:
             return False
-        # Store a deep copy to prevent external modifications
-        self._storage[quiz_id] = deepcopy(quiz)
+        # Store a deep copy and ensure ID is preserved
+        quiz_copy = deepcopy(quiz)
+        quiz_copy.id = quiz_id
+        self._storage[quiz_id] = quiz_copy
         return True
 
     def delete_quiz(self, quiz_id: str) -> bool:

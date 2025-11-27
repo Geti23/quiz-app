@@ -168,6 +168,7 @@ print(f"Was correct: {details['is_correct']}")
 **Interactive API Docs** (Built-in!)
 
 * Swagger UI at [http://localhost:8000/docs](http://localhost:8000/docs)
+* ReDoc at [http://localhost:8000/redoc](http://localhost:8000/redoc)
 * Test endpoints in browser via Swagger UI!
 
 #### CRUD Operations
