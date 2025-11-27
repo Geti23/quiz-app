@@ -14,7 +14,10 @@ class Quiz:
     - Answer review and detailed feedback
     """
 
-    def __init__(self, title: str, time_limit_seconds: Optional[int] = None) -> None:
+    def __init__(
+        self, title: str, time_limit_seconds: Optional[int] = None, quiz_id: Optional[str] = None
+    ) -> None:
+        self.id = quiz_id
         self.title = title
         self.questions: List[Question] = []
         self.answers: Dict[int, str] = {}  # Maps question index to submitted answer
@@ -135,4 +138,4 @@ class Quiz:
 
     def __repr__(self) -> str:
         """String representation for debugging"""
-        return f"Quiz(title='{self.title}', questions={len(self.questions)})"
+        return f"Quiz(id='{self.id}', title='{self.title}', questions={len(self.questions)})"

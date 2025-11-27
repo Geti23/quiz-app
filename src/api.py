@@ -169,7 +169,7 @@ async def list_quizzes() -> Dict[str, Any]:
     """
     READ - List all quizzes in the database.
 
-    Returns a list of all quizzes with basic information.
+    Returns a list of all quizzes with their IDs and basic information.
     """
     quizzes = db.list_quizzes()
 
@@ -179,6 +179,7 @@ async def list_quizzes() -> Dict[str, Any]:
         "total": len(quizzes),
         "quizzes": [
             {
+                "quiz_id": q.id,
                 "title": q.title,
                 "time_limit_seconds": q.time_limit_seconds,
                 "question_count": len(q.questions),

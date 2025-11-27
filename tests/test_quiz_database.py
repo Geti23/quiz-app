@@ -101,3 +101,28 @@ class TestQuizDatabase:
 
         db.clear()
         assert len(db.list_quizzes()) == 0
+
+    def test_quiz_id_is_stored_in_quiz_object(self):
+        db = QuizDatabase()
+        quiz = Quiz(title="Test Quiz")
+
+        # Add quiz to database
+        quiz_id = db.add_quiz(quiz)
+
+        # Retrieve quiz and verify ID is set
+        retrieved_quiz = db.get_quiz(quiz_id)
+        assert retrieved_quiz.id == quiz_id
+        assert retrieved_quiz.id is not None
+
+    def test_quiz_id_persists_after_update(self):
+        db = QuizDatabase()
+        quiz = Quiz(title="Original")
+        quiz_id = db.add_quiz(quiz)
+
+        # Update the quiz
+        updated_quiz = Quiz(title="Updated")
+        db.update_quiz(quiz_id, updated_quiz)
+
+        # Verify ID is still the same
+        retrieved = db.get_quiz(quiz_id)
+        assert retrieved.id == quiz_id
