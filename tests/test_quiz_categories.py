@@ -6,6 +6,7 @@ class TestQuizCategories:
     """Tests for organizing questions by category"""
 
     def test_question_has_category(self):
+        """UNIT: Question category attribute"""
         question = Question(
             text="What is photosynthesis?",
             options=["A", "B", "C", "D"],
@@ -15,6 +16,7 @@ class TestQuizCategories:
         assert question.category == "Biology"
 
     def test_quiz_can_get_questions_by_category(self):
+        """INTEGRATION: Quiz + Question - retrieving questions filtered by category"""
         quiz = Quiz(title="Science Quiz")
         bio_q = Question("Bio?", ["A", "B"], "A", category="Biology")
         chem_q = Question("Chem?", ["C", "D"], "C", category="Chemistry")
@@ -27,6 +29,7 @@ class TestQuizCategories:
         assert bio_questions[0].category == "Biology"
 
     def test_quiz_get_score_by_category(self):
+        """INTEGRATION: Quiz scoring behavior per category"""
         quiz = Quiz(title="Categorized Quiz")
         bio_q1 = Question("Bio1?", ["A", "B"], "A", category="Biology")
         bio_q2 = Question("Bio2?", ["C", "D"], "C", category="Biology")

@@ -5,9 +5,9 @@ This module provides HTTP endpoints for CRUD operations on quizzes.
 Run with: uvicorn src.api:app --reload
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any
 from src.quiz import Quiz
 from src.question import Question
 from src.database import QuizDatabase
@@ -21,6 +21,11 @@ app = FastAPI(
 
 # Singleton database instance
 db: QuizDatabase = QuizDatabase()
+
+
+def get_db() -> QuizDatabase:
+    """Dependency injection for database"""
+    return db
 
 
 # Pydantic models for request/response validation
@@ -95,8 +100,55 @@ class AnswerSubmissionModel(BaseModel):
     )
 
 
-# Helper function to convert Quiz to dict
-def quiz_to_dict(quiz: Quiz, quiz_id: Optional[str] = None) -> Dict[str, Any]:
+class AnswerResponseModel(BaseModel):
+    message: str
+    question_index: int
+    submitted_answer: str
+    is_correct: bool
+
+
+class QuizResultsModel(BaseModel):
+    quiz_id: str
+    title: str
+    score: int
+    total: int
+    percentage: float
+    is_perfect: bool
+    is_passing: bool
+    summary: str
+    incorrect_question_indices: List[int]
+
+
+class HealthCheckModel(BaseModel):
+    status: str
+    database_size: int
+
+
+# Helper functions
+def _create_quiz_from_model(quiz_data: QuizCreateModel) -> Quiz:
+    """Factory function to create a Quiz object from a request model"""
+    quiz = Quiz(title=quiz_data.title, time_limit_seconds=quiz_data.time_limit_seconds)
+    for q_data in quiz_data.questions:
+        question = Question(
+            text=q_data.text,
+            options=q_data.options,
+            correct_answer=q_data.correct_answer,
+            difficulty=q_data.difficulty,
+            category=q_data.category,
+        )
+        quiz.add_question(question)
+    return quiz
+
+
+def _get_quiz_or_404(quiz_id: str, database: QuizDatabase) -> Quiz:
+    """Helper to fetch quiz or raise 404"""
+    quiz = database.get_quiz(quiz_id)
+    if quiz is None:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    return quiz
+
+
+def _quiz_to_dict(quiz: Quiz, quiz_id: Optional[str] = None) -> Dict[str, Any]:
     """Convert Quiz object to dictionary for JSON response"""
     return {
         "quiz_id": quiz_id,
@@ -122,28 +174,16 @@ def quiz_to_dict(quiz: Quiz, quiz_id: Optional[str] = None) -> Dict[str, Any]:
 
 
 @app.post("/quizzes", response_model=QuizResponseModel, status_code=201)
-async def create_quiz(quiz_data: QuizCreateModel) -> QuizResponseModel:
+async def create_quiz(
+    quiz_data: QuizCreateModel, database: QuizDatabase = Depends(get_db)
+) -> QuizResponseModel:
     """
     CREATE - Add a new quiz to the database.
 
     Returns the created quiz with its generated ID.
     """
-    # Create Quiz object
-    quiz = Quiz(title=quiz_data.title, time_limit_seconds=quiz_data.time_limit_seconds)
-
-    # Add questions
-    for q_data in quiz_data.questions:
-        question = Question(
-            text=q_data.text,
-            options=q_data.options,
-            correct_answer=q_data.correct_answer,
-            difficulty=q_data.difficulty,
-            category=q_data.category,
-        )
-        quiz.add_question(question)
-
-    # Store in database
-    quiz_id = db.add_quiz(quiz)
+    quiz = _create_quiz_from_model(quiz_data)
+    quiz_id = database.add_quiz(quiz)
 
     return QuizResponseModel(
         quiz_id=quiz_id,
@@ -154,31 +194,24 @@ async def create_quiz(quiz_data: QuizCreateModel) -> QuizResponseModel:
 
 
 @app.get("/quizzes/{quiz_id}")
-async def get_quiz(quiz_id: str) -> Dict[str, Any]:
+async def get_quiz(quiz_id: str, database: QuizDatabase = Depends(get_db)) -> Dict[str, Any]:
     """
     READ - Retrieve a specific quiz by ID.
 
     Returns the complete quiz with all questions.
     """
-    quiz = db.get_quiz(quiz_id)
-
-    if quiz is None:
-        raise HTTPException(status_code=404, detail="Quiz not found")
-
-    return quiz_to_dict(quiz, quiz_id)
+    quiz = _get_quiz_or_404(quiz_id, database)
+    return _quiz_to_dict(quiz, quiz_id)
 
 
 @app.get("/quizzes")
-async def list_quizzes() -> Dict[str, Any]:
+async def list_quizzes(database: QuizDatabase = Depends(get_db)) -> Dict[str, Any]:
     """
     READ - List all quizzes in the database.
 
     Returns a list of all quizzes with their IDs and basic information.
     """
-    quizzes = db.list_quizzes()
-
-    # Note: We can't get the quiz_id from Quiz object, so we return without IDs
-    # In a real app, you'd store the ID in the Quiz object or maintain a reverse mapping
+    quizzes = database.list_quizzes()
     return {
         "total": len(quizzes),
         "quizzes": [
@@ -194,33 +227,19 @@ async def list_quizzes() -> Dict[str, Any]:
 
 
 @app.put("/quizzes/{quiz_id}")
-async def update_quiz(quiz_id: str, quiz_data: QuizCreateModel) -> Dict[str, Any]:
+async def update_quiz(
+    quiz_id: str, quiz_data: QuizCreateModel, database: QuizDatabase = Depends(get_db)
+) -> Dict[str, Any]:
     """
     UPDATE - Modify an existing quiz.
 
     Replaces the quiz with the provided data.
     """
-    # Check if quiz exists
-    existing_quiz = db.get_quiz(quiz_id)
-    if existing_quiz is None:
-        raise HTTPException(status_code=404, detail="Quiz not found")
+    # Verify quiz exists
+    _get_quiz_or_404(quiz_id, database)
 
-    # Create updated Quiz object
-    updated_quiz = Quiz(title=quiz_data.title, time_limit_seconds=quiz_data.time_limit_seconds)
-
-    # Add questions
-    for q_data in quiz_data.questions:
-        question = Question(
-            text=q_data.text,
-            options=q_data.options,
-            correct_answer=q_data.correct_answer,
-            difficulty=q_data.difficulty,
-            category=q_data.category,
-        )
-        updated_quiz.add_question(question)
-
-    # Update in database
-    success = db.update_quiz(quiz_id, updated_quiz)
+    updated_quiz = _create_quiz_from_model(quiz_data)
+    success = database.update_quiz(quiz_id, updated_quiz)
 
     if not success:
         raise HTTPException(status_code=500, detail="Failed to update quiz")  # pragma: no cover
@@ -234,13 +253,13 @@ async def update_quiz(quiz_id: str, quiz_data: QuizCreateModel) -> Dict[str, Any
 
 
 @app.delete("/quizzes/{quiz_id}")
-async def delete_quiz(quiz_id: str) -> Dict[str, Any]:
+async def delete_quiz(quiz_id: str, database: QuizDatabase = Depends(get_db)) -> Dict[str, Any]:
     """
     DELETE - Remove a quiz from the database.
 
     Returns success message if deleted.
     """
-    success = db.delete_quiz(quiz_id)
+    success = database.delete_quiz(quiz_id)
 
     if not success:
         raise HTTPException(status_code=404, detail="Quiz not found")
@@ -254,16 +273,15 @@ async def delete_quiz(quiz_id: str) -> Dict[str, Any]:
 
 
 @app.post("/quizzes/{quiz_id}/answers")
-async def submit_answer(quiz_id: str, submission: AnswerSubmissionModel) -> Dict[str, Any]:
+async def submit_answer(
+    quiz_id: str, submission: AnswerSubmissionModel, database: QuizDatabase = Depends(get_db)
+) -> AnswerResponseModel:
     """
     Submit an answer to a quiz question.
 
     Updates the quiz with the submitted answer.
     """
-    quiz = db.get_quiz(quiz_id)
-
-    if quiz is None:
-        raise HTTPException(status_code=404, detail="Quiz not found")
+    quiz = _get_quiz_or_404(quiz_id, database)
 
     if submission.question_index >= len(quiz.questions):
         raise HTTPException(status_code=400, detail="Invalid question index")
@@ -272,57 +290,56 @@ async def submit_answer(quiz_id: str, submission: AnswerSubmissionModel) -> Dict
     quiz.submit_answer(submission.question_index, submission.answer)
 
     # Update quiz in database
-    db.update_quiz(quiz_id, quiz)
+    database.update_quiz(quiz_id, quiz)
 
     # Check if answer is correct
     question = quiz.questions[submission.question_index]
     is_correct = question.check_answer(submission.answer)
 
-    return {
-        "message": "Answer submitted",
-        "question_index": submission.question_index,
-        "submitted_answer": submission.answer,
-        "is_correct": is_correct,
-    }
+    return AnswerResponseModel(
+        message="Answer submitted",
+        question_index=submission.question_index,
+        submitted_answer=submission.answer,
+        is_correct=is_correct,
+    )
 
 
-@app.get("/quizzes/{quiz_id}/results")
-async def get_quiz_results(quiz_id: str) -> Dict[str, Any]:
+@app.get("/quizzes/{quiz_id}/results", response_model=QuizResultsModel)
+async def get_quiz_results(
+    quiz_id: str, database: QuizDatabase = Depends(get_db)
+) -> QuizResultsModel:
     """
     Get the results of a completed quiz.
 
     Returns score, percentage, and detailed feedback.
     """
-    quiz = db.get_quiz(quiz_id)
-
-    if quiz is None:
-        raise HTTPException(status_code=404, detail="Quiz not found")
+    quiz = _get_quiz_or_404(quiz_id, database)
 
     result = quiz.get_result()
     incorrect = quiz.get_incorrect_answers()
 
-    return {
-        "quiz_id": quiz_id,
-        "title": quiz.title,
-        "score": result.score,
-        "total": result.total,
-        "percentage": result.percentage,
-        "is_perfect": result.is_perfect(),
-        "is_passing": result.is_passing(),
-        "summary": result.get_summary(),
-        "incorrect_question_indices": incorrect,
-    }
+    return QuizResultsModel(
+        quiz_id=quiz_id,
+        title=quiz.title,
+        score=result.score,
+        total=result.total,
+        percentage=result.percentage,
+        is_perfect=result.is_perfect(),
+        is_passing=result.is_passing(),
+        summary=result.get_summary(),
+        incorrect_question_indices=incorrect,
+    )
 
 
 @app.delete("/quizzes")
-async def clear_database() -> Dict[str, Any]:
+async def clear_database(database: QuizDatabase = Depends(get_db)) -> Dict[str, Any]:
     """
     Clear all quizzes from the database.
 
     WARNING: This will delete ALL quizzes!
     """
-    db.clear()
-    return {"message": "All quizzes deleted", "remaining_quizzes": len(db)}
+    database.clear()
+    return {"message": "All quizzes deleted", "remaining_quizzes": len(database)}
 
 
 # ============================================================================
@@ -331,17 +348,17 @@ async def clear_database() -> Dict[str, Any]:
 
 
 @app.get("/")
-async def root() -> Dict[str, Any]:
+async def root(database: QuizDatabase = Depends(get_db)) -> Dict[str, Any]:
     """API health check and information"""
     return {
         "message": "Quiz API is running",
-        "version": "1.0.0",
-        "total_quizzes": len(db),
+        "version": "5.2",
+        "total_quizzes": len(database),
         "documentation": "/docs",
     }
 
 
-@app.get("/health")
-async def health_check() -> Dict[str, Union[str, int]]:
+@app.get("/health", response_model=HealthCheckModel)
+async def health_check(database: QuizDatabase = Depends(get_db)) -> HealthCheckModel:
     """Health check endpoint"""
-    return {"status": "healthy", "database_size": len(db)}
+    return HealthCheckModel(status="healthy", database_size=len(database))

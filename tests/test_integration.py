@@ -3,7 +3,7 @@ from src.question import Question
 
 
 class TestQuizIntegration:
-    """End-to-end tests for complete quiz workflow"""
+    """Integration tests for complete quiz workflow"""
 
     def test_complete_quiz_flow(self):
         # Create quiz

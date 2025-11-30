@@ -6,6 +6,7 @@ class TestQuizReview:
     """Tests for reviewing quiz answers"""
 
     def test_get_incorrect_answers(self):
+        """INTEGRATION: Quiz review of submitted answers returns incorrect indices"""
         quiz = Quiz(title="Review Quiz")
         q1 = Question("Q1?", ["A", "B"], "A")
         q2 = Question("Q2?", ["C", "D"], "C")
@@ -25,6 +26,7 @@ class TestQuizReview:
         assert 2 in incorrect
 
     def test_get_answer_details(self):
+        """INTEGRATION: detailed answer info (submitted vs correct)"""
         quiz = Quiz(title="Detail Quiz")
         question = Question("What is 5 + 5?", ["8", "10", "12"], "10")
         quiz.add_question(question)

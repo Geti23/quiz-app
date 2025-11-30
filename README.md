@@ -225,7 +225,16 @@ mypy src/
 
 ### Test Coverage
 
-Please find the coverage report in the htmlcov/index.html file
+Please find the coverage report in the index.html file
+
+### Final Refactoring
+
+* Updated all Pydantic models to use **ConfigDict** instead of the deprecated **Config** class.
+* **Dependency Injection** - Added get_db() function and passed database through Depends() instead of using the global db. This makes testing easier and follows FastAPI best practices.
+* **DRY Principle** - Extracted repeated quiz creation logic into _create_quiz_from_model() function, eliminating  duplication between create and update endpoints.
+* **Error Handling Helper** - Created _get_quiz_or_404() to centralize the quiz lookup and 404 handling, reducing repetitive code across endpoints.
+* **Response Models** - Added AnswerResponseModel and QuizResultsModel Pydantic classes for type safety and automatic validation of response data.
+* **Consistent Naming** - Prefixed internal helper functions with underscore (_quiz_to_dict, etc.) to make the public API clearer.
 
 ## Acknowledgments
 
