@@ -6,11 +6,13 @@ class TestQuiz:
     """Tests for Quiz functionality"""
 
     def test_create_empty_quiz(self):
+        """UNIT: creating an empty Quiz object"""
         quiz = Quiz(title="Math Quiz")
         assert quiz.title == "Math Quiz"
         assert len(quiz.questions) == 0
 
     def test_add_question_to_quiz(self):
+        """UNIT: adding a Question to a Quiz"""
         quiz = Quiz(title="Science Quiz")
         question = Question(
             text="What is H2O?",
@@ -21,6 +23,7 @@ class TestQuiz:
         assert len(quiz.questions) == 1
 
     def test_cannot_add_duplicate_questions(self):
+        """UNIT: duplicate questions are not added to a Quiz"""
         quiz = Quiz(title="History Quiz")
         question = Question(
             text="Who was the first president?",
@@ -32,6 +35,7 @@ class TestQuiz:
         assert len(quiz.questions) == 1  # Should not add duplicate
 
     def test_get_question_by_index(self):
+        """UNIT: retrieve questions by index from Quiz"""
         quiz = Quiz(title="Geography Quiz")
         q1 = Question("Question 1?", ["A", "B"], "A")
         q2 = Question("Question 2?", ["C", "D"], "C")
@@ -42,6 +46,7 @@ class TestQuiz:
         assert quiz.get_question(1) == q2
 
     def test_submit_answer_and_track_score(self):
+        """INTEGRATION: submitting answers and computing QuizResult"""
         quiz = Quiz(title="Test Quiz")
         q1 = Question("Q1?", ["A", "B"], "A")
         q2 = Question("Q2?", ["C", "D"], "C")

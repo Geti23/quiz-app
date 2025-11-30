@@ -6,6 +6,7 @@ class TestQuestion:
     """Tests for individual Question objects"""
 
     def test_create_multiple_choice_question(self):
+        """UNIT: Question object creation and attribute validation"""
         question = Question(text="What is 2 + 2?", options=["3", "4", "5", "6"], correct_answer="4")
         assert question is not None
         assert question.text == "What is 2 + 2?"
@@ -13,6 +14,7 @@ class TestQuestion:
         assert question.correct_answer == "4"
 
     def test_check_correct_answer(self):
+        """UNIT: Question.check_answer behavior for correct/incorrect answers"""
         question = Question(
             text="What is the capital of France?",
             options=["London", "Paris", "Berlin", "Madrid"],
@@ -23,5 +25,6 @@ class TestQuestion:
         assert question.check_answer("London") is False
 
     def test_question_requires_text(self):
+        """UNIT: validation - question must have non-empty text"""
         with pytest.raises(ValueError):
             Question(text="", options=["A", "B"], correct_answer="A")

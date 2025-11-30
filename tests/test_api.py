@@ -46,12 +46,12 @@ class TestHealthEndpoints:
     """Tests for health check and info endpoints"""
 
     def test_root_endpoint_returns_ok(self, client):
-        """Test GET / returns 200 OK"""
+        """UNIT TEST: Test GET / returns 200 OK (single endpoint)"""
         response = client.get("/")
         assert response.status_code == 200
 
     def test_health_endpoint_returns_ok(self, client):
-        """Test GET /health returns 200 OK"""
+        """UNIT TEST: Test GET /health returns 200 OK (single endpoint)"""
         response = client.get("/health")
         assert response.status_code == 200
 
@@ -60,18 +60,18 @@ class TestCreateQuizEndpoint:
     """Tests for POST /quizzes (CREATE operation)"""
 
     def test_create_quiz_returns_created(self, client, sample_quiz_data):
-        """Test POST /quizzes returns 201 Created"""
+        """UNIT TEST: Test POST /quizzes returns 201 Created (single endpoint)"""
         response = client.post("/quizzes", json=sample_quiz_data)
         assert response.status_code == 201
 
     def test_create_quiz_with_minimal_data_returns_created(self, client):
-        """Test POST /quizzes with minimal data returns 201"""
+        """UNIT TEST: Test POST /quizzes with minimal data returns 201 (single endpoint)"""
         minimal_quiz = {"title": "Minimal Quiz", "questions": []}
         response = client.post("/quizzes", json=minimal_quiz)
         assert response.status_code == 201
 
     def test_create_quiz_with_invalid_data_returns_error(self, client):
-        """Test POST /quizzes with invalid data returns 422"""
+        """UNIT TEST: Test POST /quizzes with invalid data returns 422 (single endpoint)"""
         invalid_quiz = {"title": "", "questions": []}  # Empty title should fail validation
         response = client.post("/quizzes", json=invalid_quiz)
         assert response.status_code == 422
@@ -81,7 +81,7 @@ class TestReadQuizEndpoints:
     """Tests for GET endpoints (READ operations)"""
 
     def test_get_quiz_returns_ok(self, client, sample_quiz_data):
-        """Test GET /quizzes/{quiz_id} returns 200 OK"""
+        """INTEGRATION TEST: Test POST /quizzes then GET /quizzes/{quiz_id} (two endpoints)"""
         # First create a quiz
         create_response = client.post("/quizzes", json=sample_quiz_data)
         quiz_id = create_response.json()["quiz_id"]
@@ -91,17 +91,17 @@ class TestReadQuizEndpoints:
         assert response.status_code == 200
 
     def test_get_nonexistent_quiz_returns_not_found(self, client):
-        """Test GET /quizzes/{invalid_id} returns 404 Not Found"""
+        """UNIT TEST: Test GET /quizzes/{invalid_id} returns 404 Not Found (single endpoint)"""
         response = client.get("/quizzes/nonexistent-id-123")
         assert response.status_code == 404
 
     def test_list_quizzes_returns_ok(self, client):
-        """Test GET /quizzes returns 200 OK"""
+        """UNIT TEST: Test GET /quizzes returns 200 OK (single endpoint)"""
         response = client.get("/quizzes")
         assert response.status_code == 200
 
     def test_list_quizzes_when_empty_returns_ok(self, client):
-        """Test GET /quizzes returns 200 OK even when database is empty"""
+        """UNIT TEST: Test GET /quizzes returns 200 OK even when empty (single endpoint)"""
         db.clear()
         response = client.get("/quizzes")
         assert response.status_code == 200
@@ -111,7 +111,7 @@ class TestUpdateQuizEndpoint:
     """Tests for PUT /quizzes/{quiz_id} (UPDATE operation)"""
 
     def test_update_quiz_returns_ok(self, client, sample_quiz_data):
-        """Test PUT /quizzes/{quiz_id} returns 200 OK"""
+        """INTEGRATION TEST: Test POST /quizzes then PUT /quizzes/{quiz_id} (two endpoints)"""
         # Create a quiz first
         create_response = client.post("/quizzes", json=sample_quiz_data)
         quiz_id = create_response.json()["quiz_id"]
@@ -126,12 +126,12 @@ class TestUpdateQuizEndpoint:
         assert response.status_code == 200
 
     def test_update_nonexistent_quiz_returns_not_found(self, client, sample_quiz_data):
-        """Test PUT /quizzes/{invalid_id} returns 404 Not Found"""
+        """UNIT TEST: Test PUT /quizzes/{invalid_id} returns 404 Not Found (single endpoint)"""
         response = client.put("/quizzes/nonexistent-id-123", json=sample_quiz_data)
         assert response.status_code == 404
 
     def test_update_quiz_with_invalid_data_returns_error(self, client, sample_quiz_data):
-        """Test PUT /quizzes/{quiz_id} with invalid data returns 422"""
+        """INTEGRATION TEST: Test POST /quizzes then PUT /quizzes/{quiz_id} with invalid data (two endpoints)"""
         # Create a quiz first
         create_response = client.post("/quizzes", json=sample_quiz_data)
         quiz_id = create_response.json()["quiz_id"]
@@ -146,7 +146,7 @@ class TestDeleteQuizEndpoint:
     """Tests for DELETE /quizzes/{quiz_id} (DELETE operation)"""
 
     def test_delete_quiz_returns_ok(self, client, sample_quiz_data):
-        """Test DELETE /quizzes/{quiz_id} returns 200 OK"""
+        """INTEGRATION TEST: Test POST /quizzes then DELETE /quizzes/{quiz_id} (two endpoints)"""
         # Create a quiz first
         create_response = client.post("/quizzes", json=sample_quiz_data)
         quiz_id = create_response.json()["quiz_id"]
@@ -156,12 +156,12 @@ class TestDeleteQuizEndpoint:
         assert response.status_code == 200
 
     def test_delete_nonexistent_quiz_returns_not_found(self, client):
-        """Test DELETE /quizzes/{invalid_id} returns 404 Not Found"""
+        """UNIT TEST: Test DELETE /quizzes/{invalid_id} returns 404 Not Found (single endpoint)"""
         response = client.delete("/quizzes/nonexistent-id-123")
         assert response.status_code == 404
 
     def test_clear_all_quizzes_returns_ok(self, client):
-        """Test DELETE /quizzes returns 200 OK"""
+        """UNIT TEST: Test DELETE /quizzes returns 200 OK (single endpoint)"""
         response = client.delete("/quizzes")
         assert response.status_code == 200
 
@@ -170,7 +170,7 @@ class TestAnswerSubmissionEndpoint:
     """Tests for POST /quizzes/{quiz_id}/answers"""
 
     def test_submit_answer_returns_ok(self, client, sample_quiz_data):
-        """Test POST /quizzes/{quiz_id}/answers returns 200 OK"""
+        """INTEGRATION TEST: Test POST /quizzes then POST /quizzes/{quiz_id}/answers (two endpoints)"""
         # Create a quiz
         create_response = client.post("/quizzes", json=sample_quiz_data)
         quiz_id = create_response.json()["quiz_id"]
@@ -181,13 +181,13 @@ class TestAnswerSubmissionEndpoint:
         assert response.status_code == 200
 
     def test_submit_answer_to_nonexistent_quiz_returns_not_found(self, client):
-        """Test POST /quizzes/{invalid_id}/answers returns 404"""
+        """UNIT TEST: Test POST /quizzes/{invalid_id}/answers returns 404 (single endpoint)"""
         answer_data = {"question_index": 0, "answer": "4"}
         response = client.post("/quizzes/nonexistent-id/answers", json=answer_data)
         assert response.status_code == 404
 
     def test_submit_answer_with_invalid_index_returns_bad_request(self, client, sample_quiz_data):
-        """Test POST /quizzes/{quiz_id}/answers with invalid index returns 400"""
+        """INTEGRATION TEST: Test POST /quizzes then POST /quizzes/{quiz_id}/answers with invalid index (two endpoints)"""
         # Create a quiz with 1 question
         create_response = client.post("/quizzes", json=sample_quiz_data)
         quiz_id = create_response.json()["quiz_id"]
@@ -202,7 +202,7 @@ class TestResultsEndpoint:
     """Tests for GET /quizzes/{quiz_id}/results"""
 
     def test_get_results_returns_ok(self, client, sample_quiz_data):
-        """Test GET /quizzes/{quiz_id}/results returns 200 OK"""
+        """INTEGRATION TEST: Test POST /quizzes then GET /quizzes/{quiz_id}/results (two endpoints)"""
         # Create a quiz
         create_response = client.post("/quizzes", json=sample_quiz_data)
         quiz_id = create_response.json()["quiz_id"]
@@ -212,7 +212,7 @@ class TestResultsEndpoint:
         assert response.status_code == 200
 
     def test_get_results_for_nonexistent_quiz_returns_not_found(self, client):
-        """Test GET /quizzes/{invalid_id}/results returns 404"""
+        """UNIT TEST: Test GET /quizzes/{invalid_id}/results returns 404 (single endpoint)"""
         response = client.get("/quizzes/nonexistent-id/results")
         assert response.status_code == 404
 
@@ -221,17 +221,17 @@ class TestAPIDocumentationEndpoints:
     """Tests for auto-generated API documentation"""
 
     def test_swagger_docs_returns_ok(self, client):
-        """Test GET /docs returns 200 OK"""
+        """UNIT TEST: Test GET /docs returns 200 OK (single endpoint)"""
         response = client.get("/docs")
         assert response.status_code == 200
 
     def test_redoc_docs_returns_ok(self, client):
-        """Test GET /redoc returns 200 OK"""
+        """UNIT TEST: Test GET /redoc returns 200 OK (single endpoint)"""
         response = client.get("/redoc")
         assert response.status_code == 200
 
     def test_openapi_json_returns_ok(self, client):
-        """Test GET /openapi.json returns 200 OK"""
+        """UNIT TEST: Test GET /openapi.json returns 200 OK (single endpoint)"""
         response = client.get("/openapi.json")
         assert response.status_code == 200
 
@@ -240,7 +240,7 @@ class TestCRUDWorkflow:
     """End-to-End test for complete CRUD workflow"""
 
     def test_complete_crud_workflow_returns_ok(self, client, sample_quiz_data):
-        """Test complete CREATE -> READ -> UPDATE -> DELETE workflow"""
+        """END-TO-END TEST: Test complete CREATE -> READ -> UPDATE -> DELETE workflow (4 endpoints)"""
 
         # CREATE - Should return 201
         create_response = client.post("/quizzes", json=sample_quiz_data)
@@ -273,7 +273,7 @@ class TestQuizCompletionWorkflow:
     """End-to-End test for quiz taking workflow"""
 
     def test_complete_quiz_taking_workflow_returns_ok(self, client):
-        """Test CREATE quiz -> SUBMIT answers -> GET results workflow"""
+        """END-TO-END TEST: Test CREATE quiz -> SUBMIT answers -> GET results workflow (3+ endpoints)"""
 
         # CREATE quiz with multiple questions
         quiz_data = {
