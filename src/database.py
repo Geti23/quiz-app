@@ -33,6 +33,10 @@ class QuizDatabase:
         self._storage[quiz_id] = quiz_copy
         return quiz_id
 
+    def _quiz_exists(self, quiz_id: str) -> bool:
+        """Check if quizid is in storage"""
+        return quiz_id in self._storage
+
     def get_quiz(self, quiz_id: str) -> Optional[Quiz]:
         """
         Read - Retrieve a quiz from the database by ID.
@@ -43,7 +47,7 @@ class QuizDatabase:
         Returns:
             Quiz object if found, None otherwise
         """
-        if quiz_id not in self._storage:
+        if not self._quiz_exists(quiz_id):
             return None
         # Return a deep copy to prevent external modifications
         return deepcopy(self._storage[quiz_id])
@@ -59,7 +63,7 @@ class QuizDatabase:
         Returns:
             bool: True if update successful, False if quiz not found
         """
-        if quiz_id not in self._storage:
+        if not self._quiz_exists(quiz_id):
             return False
         # Store a deep copy and ensure ID is preserved
         quiz_copy = deepcopy(quiz)
@@ -77,7 +81,7 @@ class QuizDatabase:
         Returns:
             bool: True if deletion successful, False if quiz not found
         """
-        if quiz_id not in self._storage:
+        if not self._quiz_exists(quiz_id):
             return False
         del self._storage[quiz_id]
         return True
